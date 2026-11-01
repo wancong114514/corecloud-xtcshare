@@ -2,24 +2,36 @@ name: Build APK
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # 允许在 Actions 页面手动点击触发
+  workflow_dispatch: # 允许你在网页上手动点击按钮触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # 1. 拉取你的仓库代码
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. 设置 Java 环境 (这里用的是常用的 17 版本)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      # 3. 设置 Android 环境 (已经修复了之前 v3 报错的问题)
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
+
+      # 4. 赋予权限并开始编译 (已经修复了 Permission denied 问题)
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+
+      # 5. 打包编译好的 APK 供你下载
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-      - name: Build Debug APK
-  run: chmod +x ./gradlew && ./gradlew assembleDebug
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
